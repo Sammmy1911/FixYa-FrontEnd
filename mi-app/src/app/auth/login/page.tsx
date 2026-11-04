@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AuthLayout from '../../../components/common/AuthLayout';
 import { authService } from '../../../services/auth.service';
+import { authButton, authInput, authLabel, getErrorMessage } from '../../../components/common/authStyles';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -23,48 +24,48 @@ export default function LoginPage() {
       localStorage.setItem('user', JSON.stringify(data.user));
 
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     }
   };
 
   return (
-    <AuthLayout title="Iniciar Sesión - FixYa" error={error}>
+    <AuthLayout title="Iniciar sesión" subtitle="Ingresa a tu cuenta de FixYa." error={error}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Correo Electrónico</label>
+          <label className={authLabel}>Correo Electrónico</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-2 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:border-blue-500"
+            className={authInput}
             placeholder="tu@correo.com"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Contraseña</label>
+          <label className={authLabel}>Contraseña</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-2 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:border-blue-500"
+            className={authInput}
             placeholder="••••••••"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full py-2 bg-blue-600 hover:bg-blue-700 font-semibold rounded transition duration-200"
+          className={authButton}
         >
           Ingresar
         </button>
 
-        <p className="text-sm text-center text-gray-400 mt-4">
+        <p className="mt-4 text-center text-sm text-muted">
           ¿No tienes una cuenta?{' '}
-          <Link href="/auth/register" className="text-blue-400 hover:underline">
+          <Link href="/auth/register" className="font-semibold text-primary-strong hover:underline">
             Regístrate aquí
           </Link>
         </p>
