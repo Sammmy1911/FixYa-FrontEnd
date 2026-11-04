@@ -31,14 +31,13 @@ export default function RegisterPage() {
 
     try {
       // Creamos el payload enviando los campos comunes y agregando los de técnico si aplica
-      const payload = {
+       const payload = {
         fullName,
         email,
         password,
-        role,
-        ...(role === 'TECHNICIAN' && { phone, specialty }),
+        role: role === 'CLIENT' ? 'client' : 'technician',
       };
-
+      
       await authService('auth/register', payload);
 
       // Redirigir al login tras el registro exitoso
