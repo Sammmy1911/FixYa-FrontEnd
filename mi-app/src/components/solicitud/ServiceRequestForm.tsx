@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { API_BASE } from "@/lib/api";
+import { apiFetch } from "@/services/api";
 import { createServiceRequest } from "@/lib/serviceRequests";
 import type { Category } from "@/types/api";
 import type { ServiceRequestData } from "@/types/service-request";
@@ -32,12 +32,8 @@ export default function ServiceRequestForm() {
 
   useEffect(() => {
     let active = true;
-    fetch(`${API_BASE}/categories`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al cargar categorías");
-        return res.json() as Promise<Category[]>;
-      })
-      .then((list) => {
+    apiFetch("categories")
+      .then((list: Category[]) => {
         if (active) setCategories(list);
       })
       .catch(() => {
