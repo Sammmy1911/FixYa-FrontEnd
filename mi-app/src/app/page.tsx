@@ -112,7 +112,7 @@ export default function Home() {
           <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-8 px-4 md:px-12 lg:grid-cols-12">
             <div className="flex flex-col items-start gap-6 lg:col-span-7">
               <span className="flex items-center gap-2 rounded-full border border-line/60 bg-surface-mid px-4 py-2 text-xs font-semibold leading-4 tracking-[0.24px] text-primary-deep">
-                <span className="text-base leading-4">🇨🇴</span>
+                <span aria-hidden className="inline-flex h-3 w-[18px] flex-col overflow-hidden rounded-[2px]"><span className="h-1/2 bg-[#FCD116]" /><span className="h-1/4 bg-[#003893]" /><span className="h-1/4 bg-[#CE1126]" /></span>
                 Servicio garantizado en Cali y Valle del Cauca
               </span>
               <div className="flex flex-col gap-3">

@@ -461,7 +461,7 @@ export default function ServiceRequestForm() {
               </label>
               <div className="flex rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]">
                 <span className="flex items-center gap-1.5 rounded-l-lg border border-r-0 border-line bg-surface-low px-3.5 text-xs font-semibold tracking-[0.24px] text-ink">
-                  <span>🇨🇴</span>+57
+                  <span aria-hidden className="inline-flex h-3 w-[18px] flex-col overflow-hidden rounded-[2px]"><span className="h-1/2 bg-[#FCD116]" /><span className="h-1/4 bg-[#003893]" /><span className="h-1/4 bg-[#CE1126]" /></span>+57
                 </span>
                 <div className="relative flex-1">
                   <input
