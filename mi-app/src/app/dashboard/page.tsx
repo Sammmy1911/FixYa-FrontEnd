@@ -41,7 +41,7 @@ export default function DashboardPage() {
               Soy técnico
             </Link>
             <Link
-              href="/service-requests/new"
+              href="/solicitar"
               className="bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-semibold px-5 py-2.5 rounded-full shadow-md transition transform hover:-translate-y-0.5"
             >
               Pedir servicio →
@@ -75,7 +75,7 @@ export default function DashboardPage() {
               <Link href="/auth/login" className="text-center py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg">
                 Soy técnico
               </Link>
-              <Link href="/service-requests/new" className="text-center py-2 text-sm font-semibold text-white bg-cyan-500 rounded-lg shadow">
+              <Link href="/solicitar" className="text-center py-2 text-sm font-semibold text-white bg-cyan-500 rounded-lg shadow">
                 Pedir servicio
               </Link>
             </div>
@@ -101,7 +101,7 @@ export default function DashboardPage() {
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 pt-2">
             <Link
-              href="/service-requests/new"
+              href="/solicitar"
               className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 text-center transition transform hover:-translate-y-0.5 flex items-center justify-center space-x-2"
             >
               <span>Pedir servicio ahora</span>
@@ -221,7 +221,7 @@ export default function DashboardPage() {
               Reparación de fugas, griferías, calentadores, destape de cañerías e instalaciones hidrosanitarias.
             </p>
             <Link
-              href="/service-requests/new?category=plomeria"
+              href="/solicitar?category=plomeria"
               className="text-sm font-semibold text-cyan-600 group-hover:text-cyan-700 flex items-center space-x-1"
             >
               <span>Solicitar servicio</span>
@@ -239,7 +239,7 @@ export default function DashboardPage() {
               Cortocircuitos, instalación de lámparas, tomas corrientes, tableros eléctricos y cableado.
             </p>
             <Link
-              href="/service-requests/new?category=electricidad"
+              href="/solicitar?category=electricidad"
               className="text-sm font-semibold text-amber-600 group-hover:text-amber-700 flex items-center space-x-1"
             >
               <span>Solicitar servicio</span>
@@ -257,7 +257,7 @@ export default function DashboardPage() {
               Apertura de cerraduras de seguridad, cambio de guardas, instalación de cerrojos y duplicados.
             </p>
             <Link
-              href="/service-requests/new?category=cerrajeria"
+              href="/solicitar?category=cerrajeria"
               className="text-sm font-semibold text-blue-600 group-hover:text-blue-700 flex items-center space-x-1"
             >
               <span>Solicitar servicio</span>
