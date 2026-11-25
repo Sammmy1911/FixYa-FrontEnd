@@ -34,7 +34,7 @@ export default function RegisterPage() {
         fullName,
         email,
         password,
-        role,
+        role: role === "CLIENT" ? "client" : "technician",
         ...(role === 'TECHNICIAN' && { phone, specialty }),
       };
 
@@ -42,8 +42,8 @@ export default function RegisterPage() {
 
       // Redirigir al login tras el registro exitoso
       router.push('/auth/login');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo registrar.");
     }
   };
 
@@ -174,6 +174,7 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full px-4 py-2 bg-gray-700 rounded border border-gray-600 text-white focus:outline-none focus:border-cyan-500"
+              minLength={8}
               placeholder="••••••••"
             />
           </div>

@@ -34,3 +34,10 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+## Integración funcional local
+
+Crear `mi-app/.env.local` con `NEXT_PUBLIC_API_URL=http://localhost:3000`. Iniciar el backend y ejecutar `npm ci`, `npm run dev` en mi-app. Frontend en http://localhost:3001.
+
+El cliente accede a `/cliente/solicitudes`, el técnico a `/tecnico/solicitudes`. El backend valida los roles y la verificación. No hay carga de fotos ni reclamos de garantía en esta integración. El registro JSON de técnicos conserva los campos del formulario actual; la subida de documentos por multipart aún requiere integración de interfaz.

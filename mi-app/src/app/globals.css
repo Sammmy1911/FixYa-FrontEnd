@@ -8,8 +8,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,4 +23,18 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@theme inline {
+  --color-primary: #06b6d4;
+  --color-primary-strong: #00687a;
+  --color-primary-deep: #004253;
+  --color-ink: #0b1c30;
+  --color-body: #3d494c;
+  --color-muted: #565e74;
+  --color-subtle: #6d797d;
+  --color-line: #bcc9cd;
+  --color-surface: #f8f9ff;
+  --color-surface-low: #eff4ff;
+  --color-surface-mid: #e5eeff;
 }

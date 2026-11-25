@@ -1,8 +1,7 @@
 import { apiFetch } from './api';
 
-export const authService = async (endpoint: string, bodyData: any) => {
-  return apiFetch(endpoint, {
-    method: 'POST',
-    body: JSON.stringify(bodyData),
-  });
-};
+export type SessionUser = { id: string; email: string; fullName: string; role: 'client' | 'technician' | 'admin' };
+export type LoginResponse = { accessToken: string; user: SessionUser };
+export const authService = <T = unknown>(endpoint: string, bodyData: object) => apiFetch<T>(endpoint, {
+  method: 'POST', body: JSON.stringify(bodyData),
+});
