@@ -10,6 +10,8 @@ export type WorkRequest = {
   phone?: string | null;
   urgency?: string | null;
   status: RequestStatus;
+  recommendedForMe?: boolean;
+  hasRecommendation?: boolean;
   createdAt: string;
   category?: { id: number; name: string };
 };
@@ -34,3 +36,7 @@ export const technicianAvailable = () => apiFetch<WorkRequest[]>('service-reques
 export const technicianMine = () => apiFetch<WorkRequest[]>('service-requests/technician/mine');
 export const actionRequest = (id: string, action: 'cancel' | 'accept' | 'reject' | 'start' | 'complete', role: 'client' | 'technician') =>
   apiFetch(`service-requests/${role === 'client' ? `${id}/cancel` : `technician/${id}/${action}`}`, { method: 'PATCH' });
+
+export type Availability = { autoAvailable: boolean; coverageZones: string[]; coverageCategories: number[] };
+export const getAvailability = () => apiFetch<Availability>('service-requests/technician/availability');
+export const saveAvailability = (data: Availability) => apiFetch<Availability>('service-requests/technician/availability', { method: 'PATCH', body: JSON.stringify(data) });

@@ -81,6 +81,7 @@ export default function RequestsPage() {
           <div className="grid gap-4 md:grid-cols-2">{list.map((item) => <article key={item.id} className="rounded-2xl border border-[#dae4e7] bg-white p-6 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-2"><span className="text-xs font-bold uppercase tracking-wide text-primary-strong">{item.category?.name || 'Servicio'}</span>
               <span className="rounded-full bg-surface-low px-3 py-1 text-xs font-semibold text-body">{statusLabels[item.status] || item.status}</span></div>
+            {item.status === 'pending' && item.hasRecommendation && <p className="mb-3 rounded-lg bg-cyan-50 p-2 text-sm font-semibold text-cyan-800">Encontramos un técnico compatible. Pendiente de aceptación.</p>}
             <h2 className="mb-3 text-lg font-bold">{item.description}</h2>
             <p className="text-sm text-muted">📍 {item.address}{item.neighborhood ? ` · ${item.neighborhood}` : ''}</p>
             {item.urgency && <p className="mt-1 text-xs text-muted">Urgencia: {item.urgency === 'asap' ? 'Lo antes posible' : item.urgency === 'later' ? 'Hoy más tarde' : 'Programado'}</p>}
