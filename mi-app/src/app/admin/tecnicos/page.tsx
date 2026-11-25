@@ -51,13 +51,13 @@ export default function AdminTechniciansPage() {
       <div className="flex flex-wrap items-center gap-3">
         <label className="text-sm font-semibold" htmlFor="filter">Estado</label>
         <select id="filter" className="rounded-lg border border-line bg-white p-2" value={filter} onChange={e => setFilter(e.target.value)}><option value="all">Todos</option><option value="approved">Aprobados</option><option value="blocked">No autorizados</option></select>
-        <button disabled={loading || busy !== null} className="rounded-lg border border-line bg-white px-4 py-2 disabled:opacity-50" onClick={() => void refresh()}>Actualizar</button>
+        <button disabled={loading || busy !== null} className="rounded-lg border border-line bg-white px-4 py-2 disabled:opacity-50" onClick={() => void refresh()}>{loading ? 'Actualizando…' : 'Actualizar'}</button>
       </div>
       {error && <p role="alert" className="rounded-lg bg-red-50 p-4 text-red-800">{error}</p>}
       {message && <p role="status" className="rounded-lg bg-green-50 p-4 text-green-800">{message}</p>}
-      {loading ? <p role="status">Cargando técnicos…</p> : !error && visible.length === 0 ? <p className="rounded-xl border border-line bg-white p-6">No hay técnicos en este estado.</p> : <div className="grid gap-4 md:grid-cols-2">{visible.map(tech => <article key={tech.id} className="min-w-0 space-y-3 rounded-xl border border-line bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="break-all text-lg font-bold">{tech.fullName}</h2><span className={`rounded-full px-3 py-1 text-xs font-bold ${tech.isVerified ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-900'}`}>{tech.isVerified ? 'Aprobado' : 'No autorizado'}</span></div>
-        <p className="break-all text-sm text-muted">{tech.email}</p><p className="text-sm">Especialidad: {tech.specialty || 'Sin registrar'}</p><p className="text-sm">Documentos registrados: {tech.documentCount}</p>
+      {loading ? <p role="status" className="fixya-loading rounded-xl border border-line bg-white p-5 text-muted">Cargando técnicos…</p> : !error && visible.length === 0 ? <p className="rounded-xl border border-line bg-white p-6">No hay técnicos en este estado.</p> : <div className="grid gap-4 md:grid-cols-2">{visible.map(tech => <article key={tech.id} className="fixya-card min-w-0 space-y-3 rounded-xl border border-line bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="break-words text-lg font-bold">{tech.fullName}</h2><span className={`rounded-full px-3 py-1 text-xs font-bold ${tech.isVerified ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-900'}`}>{tech.isVerified ? 'Aprobado' : 'No autorizado'}</span></div>
+        <p className="break-words text-sm text-muted">{tech.email}</p><p className="text-sm">Especialidad: {tech.specialty || 'Sin registrar'}</p><p className="text-sm">Documentos registrados: {tech.documentCount}</p>
         <button disabled={busy !== null} onClick={() => void changeStatus(tech)} className={`rounded-lg px-4 py-2 text-sm font-bold transition disabled:opacity-50 ${tech.isVerified ? 'border border-red-300 text-red-700 hover:bg-red-50' : 'bg-primary-strong text-white hover:brightness-110'}`}>{busy === tech.id ? 'Guardando…' : tech.isVerified ? 'Suspender' : 'Aprobar'}</button>
       </article>)}</div>}
     </section>

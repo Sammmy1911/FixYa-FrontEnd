@@ -51,6 +51,9 @@ export default function DashboardPage() {
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
             <button
+              type="button"
+              aria-label="Menú de navegación"
+              aria-expanded={mobileMenuOpen}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="text-gray-600 hover:text-gray-900 focus:outline-none"
             >
