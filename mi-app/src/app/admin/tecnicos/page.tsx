@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { apiFetch } from '@/services/api';
 
 type Technician = { id: string; fullName: string; email: string; specialty: string | null; isVerified: boolean; documentCount: number };
@@ -46,6 +47,7 @@ export default function AdminTechniciansPage() {
     </div></header>
     <section className="mx-auto max-w-6xl space-y-5 px-4 py-8 sm:px-6">
       <p className="text-xs font-bold uppercase tracking-widest text-primary-strong">Administración</p>
+      <Link href="/admin/panel" className="text-sm font-semibold text-primary-strong underline">Panel de control</Link>
       <h1 className="text-3xl font-bold">Gestión de técnicos</h1>
       <p className="text-muted">Aprueba o suspende el acceso de los técnicos a las solicitudes.</p>
       <div className="flex flex-wrap items-center gap-3">

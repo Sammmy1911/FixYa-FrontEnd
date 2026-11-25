@@ -25,7 +25,7 @@ export default function LoginPage() {
       localStorage.setItem('token', data.accessToken);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      router.replace(data.user.role === 'technician' ? '/tecnico/solicitudes' : data.user.role === 'client' ? '/cliente/solicitudes' : '/admin/tecnicos');
+      router.replace(data.user.role === 'technician' ? '/tecnico/solicitudes' : data.user.role === 'client' ? '/cliente/solicitudes' : '/admin/panel');
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo iniciar sesión.");
     } finally {

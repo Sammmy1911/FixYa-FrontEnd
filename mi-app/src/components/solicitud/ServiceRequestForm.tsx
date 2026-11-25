@@ -37,7 +37,12 @@ export default function ServiceRequestForm() {
     let active = true;
     apiFetch<Category[]>("categories")
       .then((list: Category[]) => {
-        if (active) setCategories(list);
+        if (active) {
+          setCategories(list);
+          const raw = new URLSearchParams(window.location.search).get("categoryId");
+          const id = Number(raw);
+          if (raw && list.some(c => c.id === id)) setData(prev => prev.categoryId === null ? { ...prev, categoryId: id } : prev);
+        }
       })
       .catch(() => {
         if (active) setCategoriesError(true);

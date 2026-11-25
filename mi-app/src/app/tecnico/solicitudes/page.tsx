@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import NotificationBell from '@/components/common/NotificationBell';
 import AvailabilityPanel from '@/components/AvailabilityPanel';
 import { useRouter } from 'next/navigation';
 import { clientRequests, technicianAvailable, technicianMine, actionRequest, type WorkRequest, type RequestStatus } from '@/lib/serviceRequests';
@@ -59,6 +60,7 @@ export default function RequestsPage() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-5">
           <Link href="/" className="text-2xl font-extrabold tracking-tight text-primary-strong">FixYa<span className="text-primary">.</span></Link>
           <div className="flex items-center gap-3 text-sm"><span className="hidden text-muted sm:block">{user?.fullName || 'Mi cuenta'}</span>
+            {user && <NotificationBell />}
             <button className="rounded-lg border border-line px-4 py-2 font-semibold hover:bg-surface" onClick={() => {localStorage.removeItem('token');localStorage.removeItem('user');router.replace('/auth/login');}}>Cerrar sesión</button>
           </div>
         </div>
