@@ -10,10 +10,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     setError('');
 
     try {
@@ -25,16 +28,18 @@ export default function LoginPage() {
       router.replace(data.user.role === 'technician' ? '/tecnico/solicitudes' : data.user.role === 'client' ? '/cliente/solicitudes' : '/admin/tecnicos');
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo iniciar sesión.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
     <AuthLayout title="Iniciar Sesión - FixYa" error={error}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} aria-busy={submitting} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Correo Electrónico</label>
+          <label htmlFor="login-email" className="block text-sm font-medium mb-1">Correo Electrónico</label>
           <input
-            type="email"
+            id="login-email" autoComplete="email" type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -44,9 +49,9 @@ export default function LoginPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Contraseña</label>
+          <label htmlFor="login-password" className="block text-sm font-medium mb-1">Contraseña</label>
           <input
-            type="password"
+            id="login-password" autoComplete="current-password" type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -57,9 +62,11 @@ export default function LoginPage() {
 
         <button
           type="submit"
+            disabled={submitting}
+            aria-busy={submitting}
           className="w-full py-2 bg-blue-600 hover:bg-blue-700 font-semibold rounded transition duration-200"
         >
-          Ingresar
+          {submitting ? 'Ingresando…' : 'Ingresar'}
         </button>
 
         <p className="text-sm text-center text-gray-400 mt-4">

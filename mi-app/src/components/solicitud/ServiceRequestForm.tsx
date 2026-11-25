@@ -155,10 +155,10 @@ export default function ServiceRequestForm() {
           <div>
             <p className="mb-2 text-sm font-medium text-slate-700">Tipo de servicio</p>
             {loadingCategories && (
-              <p className="text-sm text-slate-500">Cargando servicios...</p>
+              <p role="status" className="fixya-loading text-sm text-slate-500">Cargando servicios...</p>
             )}
             {categoriesError && (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                 No pudimos cargar los servicios.
                 <button
                   type="button"
@@ -169,7 +169,7 @@ export default function ServiceRequestForm() {
                 </button>
               </div>
             )}
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2 min-[380px]:grid-cols-2 sm:grid-cols-3">
               {categories.map((c) => (
                 <button
                   key={c.id}
@@ -274,9 +274,10 @@ export default function ServiceRequestForm() {
             </select>
           </div>
           {submitError && <div role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{submitError} <Link href="/auth/login" className="underline">Iniciar sesión</Link></div>}
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row">
             <button
               type="button"
+              disabled={submitting}
               onClick={() => setStep(1)}
               className="flex-1 rounded-lg border border-slate-200 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
             >
@@ -286,6 +287,7 @@ export default function ServiceRequestForm() {
               type="button"
               onClick={handleSubmit}
               disabled={submitting}
+              aria-busy={submitting}
               className="flex-1 rounded-lg bg-cyan-500 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:opacity-60"
             >
               {submitting ? "Enviando..." : "Solicitar servicio"}

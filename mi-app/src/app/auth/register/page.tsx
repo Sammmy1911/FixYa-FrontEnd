@@ -17,6 +17,7 @@ export default function RegisterPage() {
   const [specialty, setSpecialty] = useState('Plomería'); // Especialidad por defecto
   
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
   const handleSelectRole = (selectedRole: 'CLIENT' | 'TECHNICIAN') => {
@@ -26,6 +27,8 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     setError('');
 
     try {
@@ -44,6 +47,8 @@ export default function RegisterPage() {
       router.push('/auth/login');
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo registrar.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -100,10 +105,10 @@ export default function RegisterPage() {
 
       {/* PASO 2: FORMULARIO SEGÚN ROL */}
       {step === 2 && (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} aria-busy={submitting} className="space-y-4">
           <button
             type="button"
-            onClick={() => setStep(1)}
+            disabled={submitting} onClick={() => setStep(1)}
             className="text-xs text-cyan-400 hover:underline mb-2 flex items-center space-x-1"
           >
             ← Cambiar perfil ({role === 'CLIENT' ? 'Cliente' : 'Técnico'})
@@ -181,13 +186,15 @@ export default function RegisterPage() {
 
           <button
             type="submit"
+            disabled={submitting}
+            aria-busy={submitting}
             className={`w-full py-2.5 font-bold rounded transition duration-200 text-white shadow-md ${
               role === 'CLIENT'
                 ? 'bg-cyan-600 hover:bg-cyan-700'
                 : 'bg-amber-600 hover:bg-amber-700'
             }`}
           >
-            Registrarse como {role === 'CLIENT' ? 'Cliente' : 'Técnico'}
+            {submitting ? 'Creando cuenta…' : `Registrarse como ${role === 'CLIENT' ? 'Cliente' : 'Técnico'}`}
           </button>
         </form>
       )}
