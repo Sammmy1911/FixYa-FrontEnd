@@ -1,29 +1,27 @@
-const API_URL = 'http://localhost:3000'; // URL de tu backend en NestJS
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-  // Obtener el token del localStorage si existe (para rutas protegidas)
+export async function apiFetch<T = unknown>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string>),
-  };
-
-  // Si hay token, lo adjuntamos automáticamente en las peticiones
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  const headers = new Headers(options.headers);
+  if (options.body && !headers.has('Content-Type') && !(options.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
   }
-
-  const res = await fetch(`${API_URL}/${endpoint}`, {
-    ...options,
-    headers,
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.message || 'Ocurrió un error en la petición');
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL.replace(/\/$/, '')}/${endpoint.replace(/^\//, '')}`, { ...options, headers, cache: 'no-store' });
+  } catch {
+    throw new Error('No se pudo conectar con FixYa. Comprueba que el backend esté encendido.');
   }
-
-  return data;
-};
+  const body: unknown = await response.json().catch(() => null);
+  if (!response.ok) {
+    if (response.status === 401 && typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+    const data = body as { message?: string | string[] } | null;
+    const msg = data?.message;
+    throw new Error(Array.isArray(msg) ? msg.join(', ') : msg || `Error HTTP ${response.status}`);
+  }
+  return body as T;
+}

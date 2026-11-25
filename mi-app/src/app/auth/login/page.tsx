@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AuthLayout from '../../../components/common/AuthLayout';
-import { authService } from '../../../services/auth.service';
+import { authService, type LoginResponse } from '../../../services/auth.service';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -17,14 +17,14 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const data = await authService('auth/login', { email, password });
+      const data = await authService<LoginResponse>('auth/login', { email, password });
 
       localStorage.setItem('token', data.accessToken);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message);
+      router.replace(data.user.role === 'technician' ? '/tecnico/solicitudes' : data.user.role === 'client' ? '/cliente/solicitudes' : '/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo iniciar sesión.");
     }
   };
 

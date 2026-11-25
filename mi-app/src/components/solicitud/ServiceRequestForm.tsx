@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { apiFetch } from "@/services/api";
 import { createServiceRequest } from "@/lib/serviceRequests";
 import type { Category } from "@/types/api";
@@ -15,6 +16,7 @@ const emptyData: ServiceRequestData = {
   address: "",
   neighborhood: "",
   phone: "",
+  urgency: "asap",
 };
 
 const inputClass =
@@ -29,10 +31,11 @@ export default function ServiceRequestForm() {
   const [categoriesError, setCategoriesError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     let active = true;
-    apiFetch("categories")
+    apiFetch<Category[]>("categories")
       .then((list: Category[]) => {
         if (active) setCategories(list);
       })
@@ -86,6 +89,8 @@ export default function ServiceRequestForm() {
 
   async function handleSubmit() {
     if (!validateStep2()) return;
+    if (submitting) return;
+    setSubmitError("");
     setSubmitting(true);
     try {
       await createServiceRequest({
@@ -96,12 +101,15 @@ export default function ServiceRequestForm() {
         phone: data.phone.replace(/\s/g, ""),
       });
       setStep("done");
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "No se pudo enviar la solicitud.");
     } finally {
       setSubmitting(false);
     }
   }
 
   function reset() {
+    setSubmitError("");
     setData(emptyData);
     setErrors({});
     setStep(1);
@@ -125,6 +133,7 @@ export default function ServiceRequestForm() {
         >
           Hacer otra solicitud
         </button>
+        <Link href="/cliente/solicitudes" className="mt-4 block font-semibold text-cyan-700">Ver mis solicitudes</Link>
       </section>
     );
   }
@@ -258,6 +267,13 @@ export default function ServiceRequestForm() {
             {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
           </div>
 
+          <div>
+            <label htmlFor="urgency" className="mb-2 block text-sm font-medium text-slate-700">Urgencia</label>
+            <select id="urgency" value={data.urgency} onChange={(e) => update("urgency", e.target.value as ServiceRequestData["urgency"])} className={inputClass}>
+              <option value="asap">Lo antes posible</option><option value="later">Más tarde</option><option value="scheduled">Programado</option>
+            </select>
+          </div>
+          {submitError && <div role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{submitError} <Link href="/auth/login" className="underline">Iniciar sesión</Link></div>}
           <div className="flex gap-3 pt-2">
             <button
               type="button"
