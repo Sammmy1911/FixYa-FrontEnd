@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AuthLayout from '../../../components/common/AuthLayout';
 import { authService } from '../../../services/auth.service';
+import { apiFetch } from '../../../services/api';
 
 export default function RegisterPage() {
   const [step, setStep] = useState<1 | 2>(1); // Paso 1: Perfil, Paso 2: Formulario
@@ -16,6 +17,7 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState('');
   const [specialty, setSpecialty] = useState('Plomería'); // Especialidad por defecto
   
+  const [documents, setDocuments] = useState<File[]>([]);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
@@ -32,16 +34,17 @@ export default function RegisterPage() {
     setError('');
 
     try {
-      // Creamos el payload enviando los campos comunes y agregando los de técnico si aplica
-      const payload = {
-        fullName,
-        email,
-        password,
-        role: role === "CLIENT" ? "client" : "technician",
-        ...(role === 'TECHNICIAN' && { phone, specialty }),
-      };
-
-      await authService('auth/register', payload);
+      if (role === 'TECHNICIAN') {
+        if (documents.length < 1 || documents.length > 5) throw new Error('Adjunta entre uno y cinco documentos.');
+        if (documents.some(file => file.size > 5 * 1024 * 1024 || !['application/pdf','image/jpeg','image/png'].includes(file.type))) throw new Error('Solo PDF, JPG o PNG de hasta 5 MB.');
+        const form = new FormData();
+        form.append('fullName', fullName.trim()); form.append('email', email.trim()); form.append('password', password);
+        form.append('phone', phone.replace(/[\s()-]/g, '')); form.append('specialty', specialty);
+        documents.forEach(file => form.append('documents', file));
+        await apiFetch('technicians/register', { method: 'POST', body: form });
+      } else {
+        await authService('auth/register', { fullName, email, password, role: 'client' });
+      }
 
       // Redirigir al login tras el registro exitoso
       router.push('/auth/login');
@@ -167,6 +170,11 @@ export default function RegisterPage() {
                   <option value="Aire Acondicionado">Aire Acondicionado</option>
                   <option value="Electrodomésticos">Electrodomésticos</option>
                 </select>
+              </div>
+              <div>
+                <label htmlFor="technician-documents" className="block text-sm font-medium mb-1">Documentos de verificación</label>
+                <input id="technician-documents" type="file" multiple required accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" onChange={e => setDocuments(Array.from(e.target.files ?? []))} className="w-full rounded border border-gray-600 bg-gray-700 p-3 text-sm text-white" />
+                <p className="mt-2 text-xs text-gray-400">Adjunta de 1 a 5 archivos PDF, JPG o PNG (máximo 5 MB cada uno). Un administrador debe verificar tu perfil.</p>
               </div>
             </>
           )}

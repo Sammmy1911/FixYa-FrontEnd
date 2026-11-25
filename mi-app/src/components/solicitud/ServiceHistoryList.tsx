@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/services/api";
+import HistoryActions from "./HistoryActions";
 
 export interface HistoryServiceItem {
   id: string;
@@ -12,6 +13,12 @@ export interface HistoryServiceItem {
   neighborhood?: string | null;
   phone?: string;
   createdAt?: string;
+  completedAt?: string | null;
+  updatedAt?: string;
+  paidAmount?: number | null;
+  hasReview?: boolean;
+  warrantyOfId?: string | null;
+  warrantyRequestId?: string | null;
   category?: { id: string | number; name: string } | null;
   categoryId?: string | number;
   technician?: { fullName?: string; name?: string } | null;
@@ -29,39 +36,16 @@ function formatDate(iso?: string): string {
 }
 
 function getStatusBadge(rawStatus?: string): { label: string; style: string } {
-  const s = (rawStatus ?? "").toLowerCase().trim().replace(/[_-]+/g, " ");
-  if (s.includes("final") || s.includes("complet") || s.includes("done")) {
-    return { label: "Finalizado", style: "bg-emerald-50 text-emerald-700 border-emerald-200" };
-  }
-  if (s.includes("curso") || s.includes("progress")) {
-    return { label: "En curso", style: "bg-amber-50 text-amber-700 border-amber-200" };
-  }
-  if (s.includes("asign")) {
-    return { label: "Asignado", style: "bg-blue-50 text-blue-700 border-blue-200" };
-  }
-  return { label: "Solicitado", style: "bg-slate-100 text-slate-700 border-slate-200" };
+  const labels: Record<string, string> = { pending: "Solicitado", accepted: "Asignado", in_progress: "En curso", completed: "Finalizado", cancelled: "Cancelado" };
+  return { label: labels[rawStatus ?? ""] ?? "Desconocido", style: "fixya-status" };
 }
 
-function isFinished(rawStatus?: string): boolean {
-  const s = (rawStatus ?? "").toLowerCase();
-  return s.includes("final") || s.includes("complet") || s.includes("done");
-}
+function isFinished(rawStatus?: string): boolean { return rawStatus === "completed"; }
 
-function buildRehireUrl(item: HistoryServiceItem, mode: "rehire" | "warranty"): string {
+function buildRehireUrl(item: HistoryServiceItem): string {
   const params = new URLSearchParams();
   const catId = item.category?.id ?? item.categoryId;
   if (catId !== undefined && catId !== null) params.set("categoryId", String(catId));
-  if (item.address) params.set("address", item.address);
-  if (item.neighborhood) params.set("neighborhood", item.neighborhood);
-  if (item.phone) params.set("phone", item.phone);
-
-  const baseDesc = item.description ?? "";
-  const description =
-    mode === "warranty"
-      ? `[Garantía solicitud #${item.id.slice(0, 8)}] ${baseDesc}`.slice(0, 500)
-      : baseDesc;
-
-  if (description) params.set("description", description);
   return `/solicitar?${params.toString()}`;
 }
 
@@ -75,9 +59,8 @@ export default function ServiceHistoryList() {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiFetch("service-requests");
-      const list: HistoryServiceItem[] = Array.isArray(res) ? res : res?.data ?? [];
-      setItems(list);
+      const list = await apiFetch<HistoryServiceItem[]>("service-requests/mine");
+      setItems(list.filter(i => i.status === "completed" || i.status === "cancelled").sort((a,b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "No se pudo cargar tu historial.");
     } finally {
@@ -86,7 +69,7 @@ export default function ServiceHistoryList() {
   }
 
   useEffect(() => {
-    loadHistory();
+    void Promise.resolve().then(loadHistory);
   }, []);
 
   if (loading) {
@@ -186,18 +169,18 @@ export default function ServiceHistoryList() {
                         {item.category?.name ?? "Servicio general"}
                       </h2>
                       <span
-                        className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${badge.style}`}
+                        className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${badge.style}`} data-status={item.status}
                       >
                         {badge.label}
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-slate-500">
-                      Solicitado el {formatDate(item.createdAt)} · Técnico: {techName}
+                      {finished ? "Finalizado el" : "Solicitado el"} {formatDate(finished ? item.completedAt ?? item.updatedAt ?? item.createdAt : item.createdAt)} · Técnico: {techName}
                     </p>
                   </div>
 
                   <Link
-                    href="/mis-servicios"
+                    href={`/cliente/seguimiento?id=${encodeURIComponent(item.id)}`}
                     className="text-xs font-semibold text-cyan-600 hover:underline"
                   >
                     Ver estado →
@@ -211,21 +194,9 @@ export default function ServiceHistoryList() {
                 </p>
 
                 <div className="mt-4 flex flex-wrap gap-3 border-t border-slate-100 pt-4">
-                  <Link
-                    href={buildRehireUrl(item, "rehire")}
-                    className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
-                  >
-                    Volver a contratar
-                  </Link>
+                  {finished && <Link href={buildRehireUrl(item)} className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400">Volver a contratar</Link>}
 
-                  {finished && (
-                    <Link
-                      href={buildRehireUrl(item, "warranty")}
-                      className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-100"
-                    >
-                      Reclamar garantía
-                    </Link>
-                  )}
+                  {finished && <HistoryActions item={item} />}
                 </div>
               </article>
             );

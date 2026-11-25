@@ -42,11 +42,8 @@ const STAGES: { key: ServiceStage; label: string; expectation: string }[] = [
 ];
 
 function normalizeStage(rawStatus?: string): ServiceStage {
-  const s = (rawStatus ?? "").toLowerCase().trim().replace(/[_-]+/g, " ");
-  if (s.includes("asign")) return "asignado";
-  if (s.includes("curso") || s.includes("progress")) return "en curso";
-  if (s.includes("final") || s.includes("complet") || s.includes("done")) return "finalizado";
-  return "solicitado";
+  const stages: Record<string, ServiceStage> = { pending: "solicitado", accepted: "asignado", in_progress: "en curso", completed: "finalizado" };
+  return stages[rawStatus ?? ""] ?? "solicitado";
 }
 
 export default function ServiceStatusTracker({ initialId }: { initialId?: string }) {
@@ -55,16 +52,16 @@ export default function ServiceStatusTracker({ initialId }: { initialId?: string
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function loadRequests() {
-    setLoading(true);
+  async function loadRequests(background = false) {
+    if (!background) setLoading(true);
     setError(null);
     try {
-      const res = await apiFetch("service-requests");
-      const list: ServiceRequestItem[] = Array.isArray(res) ? res : res?.data ?? [];
+      const list = await apiFetch<ServiceRequestItem[]>("service-requests/mine");
       setRequests(list);
-      if (list.length > 0 && !selectedId) {
-        setSelectedId(initialId ?? list[0].id);
-      }
+      setSelectedId(previous => {
+        const desired = previous ?? initialId ?? new URLSearchParams(window.location.search).get("id");
+        return list.find(item => item.id === desired)?.id ?? list[0]?.id ?? null;
+      });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "No se pudo cargar el estado del servicio.");
     } finally {
@@ -73,7 +70,9 @@ export default function ServiceStatusTracker({ initialId }: { initialId?: string
   }
 
   useEffect(() => {
-    loadRequests();
+    void Promise.resolve().then(() => loadRequests());
+    const timer = window.setInterval(() => { if (!document.hidden) void loadRequests(true); }, 15000);
+    return () => window.clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -91,7 +90,7 @@ export default function ServiceStatusTracker({ initialId }: { initialId?: string
         <p>{error}</p>
         <button
           type="button"
-          onClick={loadRequests}
+          onClick={() => void loadRequests()}
           className="mt-3 rounded-lg bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700"
         >
           Reintentar
@@ -128,7 +127,7 @@ export default function ServiceStatusTracker({ initialId }: { initialId?: string
         </div>
         <button
           type="button"
-          onClick={loadRequests}
+          onClick={() => void loadRequests()}
           className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
         >
           Actualizar estado
@@ -151,13 +150,14 @@ export default function ServiceStatusTracker({ initialId }: { initialId?: string
                 }`}
               >
                 <div>{req.category?.name ?? "Servicio"}</div>
-                <div className="text-xs opacity-75">{normalizeStage(req.status)}</div>
+                <div className="text-xs opacity-75">{req.status === "cancelled" ? "Cancelado" : normalizeStage(req.status)}</div>
               </button>
             );
           })}
         </div>
       )}
 
+      {activeRequest.status === "cancelled" ? <div role="status" className="rounded-xl bg-red-50 p-4 text-red-800">Esta solicitud fue cancelada.</div> : <>
       {/* Stepper de 4 estados */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {STAGES.map((stage, idx) => {
@@ -202,6 +202,7 @@ export default function ServiceStatusTracker({ initialId }: { initialId?: string
         <p className="mt-1 text-sm text-slate-700">{STAGES[currentIndex].expectation}</p>
       </div>
 
+      </>}
       {/* Resumen del servicio */}
       <div className="grid gap-3 rounded-xl border border-slate-200 p-4 text-sm sm:grid-cols-2">
         <div>

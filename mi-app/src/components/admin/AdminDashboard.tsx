@@ -3,17 +3,6 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/services/api";
 
-interface AdminSummary {
-  totalRequests?: number;
-  byStatus?: Record<string, number>;
-  solicitado?: number;
-  asignado?: number;
-  enCurso?: number;
-  finalizado?: number;
-  totalTechnicians?: number;
-  totalUsers?: number;
-}
-
 interface AdminRequestRow {
   id: string;
   status: string;
@@ -34,29 +23,24 @@ interface UserRow {
   specialty?: string;
 }
 
-const STATUS_OPTIONS = ["solicitado", "asignado", "en curso", "finalizado"];
+const STATUS_LABELS: Record<string, string> = { pending: "Solicitado", accepted: "Asignado", in_progress: "En curso", completed: "Finalizado", cancelled: "Cancelado" };
 
 export default function AdminDashboard() {
-  const [summary, setSummary] = useState<AdminSummary | null>(null);
   const [requests, setRequests] = useState<AdminRequestRow[]>([]);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   async function loadAdminData() {
     setLoading(true);
     setError(null);
     try {
-      const [summaryRes, requestsRes, usersRes] = await Promise.all([
-        apiFetch("service-requests/admin/summary").catch(() => null),
-        apiFetch("service-requests"),
-        apiFetch("users").catch(() => []),
+      const [requestsRes, usersRes] = await Promise.all([
+        apiFetch<AdminRequestRow[]>("service-requests/admin/all"),
+        apiFetch<UserRow[]>("users"),
       ]);
-
-      setSummary(summaryRes);
-      setRequests(Array.isArray(requestsRes) ? requestsRes : requestsRes?.data ?? []);
-      setUsers(Array.isArray(usersRes) ? usersRes : usersRes?.data ?? []);
+      setRequests(requestsRes);
+      setUsers(usersRes);
     } catch (err: unknown) {
       setError(
         err instanceof Error
@@ -69,23 +53,9 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
-    loadAdminData();
+    void Promise.resolve().then(loadAdminData);
   }, []);
 
-  async function handleStatusChange(id: string, nextStatus: string) {
-    setUpdatingId(id);
-    try {
-      await apiFetch(`service-requests/${id}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: nextStatus }),
-      });
-      await loadAdminData();
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "No se pudo actualizar el estado.");
-    } finally {
-      setUpdatingId(null);
-    }
-  }
 
   if (loading) {
     return (
@@ -114,16 +84,10 @@ export default function AdminDashboard() {
     String(u.role ?? "").toLowerCase().includes("tech"),
   );
 
-  const totalRequests = summary?.totalRequests ?? requests.length;
-  const activeCount = requests.filter((r) => {
-    const s = String(r.status ?? "").toLowerCase();
-    return !s.includes("final") && !s.includes("complet");
-  }).length;
-  const finishedCount =
-    summary?.finalizado ??
-    summary?.byStatus?.finalizado ??
-    requests.filter((r) => String(r.status ?? "").toLowerCase().includes("final")).length;
-  const techCount = summary?.totalTechnicians ?? technicians.length;
+  const totalRequests = requests.length;
+  const activeCount = requests.filter(r => ["pending", "accepted", "in_progress"].includes(r.status)).length;
+  const finishedCount = requests.filter(r => r.status === "completed").length;
+  const techCount = technicians.length;
 
   return (
     <section className="mx-auto max-w-6xl space-y-8">
@@ -202,21 +166,7 @@ export default function AdminDashboard() {
                       {req.technician?.fullName ?? req.technician?.name ?? "Sin asignar"}
                     </td>
                     <td className="px-6 py-4">
-                      <select
-                        value={req.status}
-                        disabled={updatingId === req.id}
-                        onChange={(e) => handleStatusChange(req.id, e.target.value)}
-                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 outline-none focus:border-cyan-500"
-                      >
-                        {!STATUS_OPTIONS.includes(req.status) && (
-                          <option value={req.status}>{req.status}</option>
-                        )}
-                        {STATUS_OPTIONS.map((st) => (
-                          <option key={st} value={st}>
-                            {st}
-                          </option>
-                        ))}
-                      </select>
+                      <span className="fixya-status rounded-full px-3 py-1 text-xs font-semibold" data-status={req.status}>{STATUS_LABELS[req.status] ?? req.status}</span>
                     </td>
                   </tr>
                 ))
